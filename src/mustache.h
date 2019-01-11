@@ -31,8 +31,10 @@ class Renderer;
 /** Context is an interface that Mustache::Renderer::render() uses to
   * fetch substitutions for template tags.
   */
-class Context
+class Context : public QObject
 {
+	Q_OBJECT
+
 public:
 	/** Create a context.  @p resolver is used to fetch the expansions for any {{>partial}} tags
 	  * which appear in a template.
@@ -43,7 +45,7 @@ public:
 	/** Returns a string representation of the value for @p key in the current context.
 	  * This is used to replace a Mustache value tag.
 	  */
-	virtual QString stringValue(const QString& key) const = 0;
+	virtual QString stringValue(const QString& key) = 0;
 
 	/** Returns true if the value for @p key is 'false' or an empty list.
 	  * 'False' values typically include empty strings, the boolean value false etc.
@@ -99,6 +101,7 @@ private:
 /** A context implementation which wraps a QVariantHash or QVariantMap. */
 class QtVariantContext : public Context
 {
+	Q_OBJECT
 public:
 	/** Construct a QtVariantContext which wraps a dictionary in a QVariantHash
 	 * or a QVariantMap.
@@ -110,7 +113,7 @@ public:
 #endif
 	explicit QtVariantContext(const QVariant& root, PartialResolver* resolver = 0);
 
-	virtual QString stringValue(const QString& key) const;
+	virtual QString stringValue(const QString& key);
 	virtual bool isFalse(const QString& key) const;
 	virtual int listCount(const QString& key) const;
 	virtual void push(const QString& key, int index = -1);
@@ -118,9 +121,10 @@ public:
 	virtual bool canEval(const QString& key) const;
 	virtual QString eval(const QString& key, const QString& _template, Mustache::Renderer* renderer);
 
-private:
+protected:
 	QVariant value(const QString& key) const;
 
+private:
 	QStack<QVariant> m_contextStack;
 };
 
@@ -183,7 +187,9 @@ struct Tag
 	{
 		Escape,
 		Unescape,
-		Raw
+		Raw,
+		SqlEscape,
+		SqlUnescape
 	};
 
 	Tag()
@@ -205,8 +211,10 @@ struct Tag
 /** Renders Mustache templates, replacing mustache tags with
   * values from a provided context.
   */
-class Renderer
+class Renderer : public QObject
 {
+	Q_OBJECT
+
 public:
 	Renderer();
 

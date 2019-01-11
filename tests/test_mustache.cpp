@@ -86,8 +86,8 @@ void TestMustache::testSections()
 
 	// test inverted sections
 	map.remove("contacts");
-	context = Mustache::QtVariantContext(map);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context2(map);
+	output = renderer.render(_template, &context2);
 
 	expectedOutput = "Name: John Smith, Email: john.smith@gmail.com\n"
 	                 "  No contacts";
@@ -95,8 +95,8 @@ void TestMustache::testSections()
 
 	// test with an empty list instead of an empty key
 	map["contacts"] = QVariantHash();
-	context = Mustache::QtVariantContext(map);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context3(map);
+	output = renderer.render(_template, &context3);
 	QCOMPARE(output, expectedOutput);
 }
 
@@ -108,50 +108,50 @@ void TestMustache::testFalsiness()
 
 	// test falsiness of 0
 	data["bool"] = 0;
-	Mustache::QtVariantContext context = Mustache::QtVariantContext(data);
+	Mustache::QtVariantContext context(data);
 	QString output = renderer.render(_template, &context);
 	QVERIFY2(output.isEmpty(), "0 evaluated as truthy");
 
 	// test falsiness of 0u
 	data["bool"] = 0u;
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context2(data);
+	output = renderer.render(_template, &context2);
 	QVERIFY2(output.isEmpty(), "0u evaluated as truthy");
 
 	// test falsiness of 0ll
 	data["bool"] = 0ll;
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context3(data);
+	output = renderer.render(_template, &context3);
 	QVERIFY2(output.isEmpty(), "0ll evaluated as truthy");
 
 	// test falsiness of 0ull
 	data["bool"] = 0ull;
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context4(data);
+	output = renderer.render(_template, &context4);
 	QVERIFY2(output.isEmpty(), "0ull evaluated as truthy");
 
 	// test falsiness of 0.0
 	data["bool"] = 0.0;
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context5(data);
+	output = renderer.render(_template, &context5);
 	QVERIFY2(output.isEmpty(), "0.0 evaluated as truthy");
 
 	// test falsiness of 0.0f
 	data["bool"] = 0.0f;
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context6(data);
+	output = renderer.render(_template, &context6);
 	QVERIFY2(output.isEmpty(), "0.0f evaluated as truthy");
 
 	// test falsiness of '\0'
 	data["bool"] = '\0';
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context7(data);
+	output = renderer.render(_template, &context7);
 	QVERIFY2(output.isEmpty(), "'\0' evaluated as truthy");
 
 	// test falsiness of 'false'
 	data["bool"] = false;
-	context = Mustache::QtVariantContext(data);
-	output = renderer.render(_template, &context);
+	Mustache::QtVariantContext context8(data);
+	output = renderer.render(_template, &context8);
 	QVERIFY2(output.isEmpty(), "'\0' evaluated as truthy");
 }
 
@@ -326,7 +326,7 @@ public:
 		return renderer->render(_template, this);
 	}
 
-	virtual QString stringValue(const QString& key) const {
+	virtual QString stringValue(const QString& key) {
 		if (key == "count") {
 			return QString::number(counter);
 		} else {

@@ -6,6 +6,7 @@ TEMPLATE = app
 DEPENDPATH += . src tests
 INCLUDEPATH += . src tests
 QT += testlib
+QT += script
 QT -= gui
 CONFIG -= app_bundle
 
@@ -14,8 +15,8 @@ CONFIG -= app_bundle
 }
 
 # Input
-HEADERS += src/mustache.h tests/test_mustache.h
-SOURCES += src/mustache.cpp tests/test_mustache.cpp
+HEADERS += src/mustache.h src/jsqtvariantcontext.h tests/test_mustache.h
+SOURCES += src/mustache.cpp src/jsqtvariantcontext.cpp tests/test_mustache.cpp
 
 # Copies the given files to the destination directory
 defineTest(copyToDestdir) {

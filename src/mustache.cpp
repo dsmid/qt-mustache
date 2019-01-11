@@ -63,6 +63,32 @@ QString unescapeHtml(const QString& escaped)
 	return unescaped;
 }
 
+QString escapeSql(const QString& input)
+{
+	QString escaped(input);
+	escaped.replace(QLatin1String("'"), QLatin1String("''"));
+	escaped.replace(QLatin1String("\\"), QLatin1String("\\\\"));
+	return escaped;
+}
+
+QString unescapeSql(const QString& escaped)
+{
+	QString unescaped(escaped);
+	unescaped.replace(QLatin1String("\\0"), QLatin1String("\x00"));
+	unescaped.replace(QLatin1String("\\'"), QLatin1String("'"));
+	unescaped.replace(QLatin1String("\\\""), QLatin1String("\""));
+	unescaped.replace(QLatin1String("\\b"), QLatin1String("\b"));
+	unescaped.replace(QLatin1String("\\n"), QLatin1String("\n"));
+	unescaped.replace(QLatin1String("\\r"), QLatin1String("\r"));
+	unescaped.replace(QLatin1String("\\t"), QLatin1String("\t"));
+	unescaped.replace(QLatin1String("\\Z"), QLatin1String("\x1a"));
+	unescaped.replace(QLatin1String("\\%"), QLatin1String("%"));
+	unescaped.replace(QLatin1String("\\_"), QLatin1String("_"));
+	unescaped.replace(QLatin1String("''"), QLatin1String("'"));
+	unescaped.replace(QLatin1String("\\\\"), QLatin1String("\\"));
+	return unescaped;
+}
+
 Context::Context(PartialResolver* resolver)
 	: m_partialResolver(resolver)
 {}
@@ -160,7 +186,7 @@ bool QtVariantContext::isFalse(const QString& key) const
 	}
 }
 
-QString QtVariantContext::stringValue(const QString& key) const
+QString QtVariantContext::stringValue(const QString& key)
 {
 	if (isFalse(key) && value(key).userType() != QVariant::Bool) {
 		return QString();
@@ -287,6 +313,10 @@ QString Renderer::render(const QString& _template, int startPos, int endPos, Con
 				value = escapeHtml(value);
 			} else if (tag.escapeMode == Tag::Unescape) {
 				value = unescapeHtml(value);
+			} else if (tag.escapeMode == Tag::SqlEscape) {
+				value = escapeSql(value);
+			} else if (tag.escapeMode == Tag::SqlUnescape) {
+				value = unescapeSql(value);
 			}
 			output += value;
 			lastTagEnd = tag.end;
@@ -443,6 +473,12 @@ Tag Renderer::findTag(const QString& content, int pos, int endPos)
 	} else {
 		if (typeChar == '&') {
 			tag.escapeMode = Tag::Unescape;
+			++pos;
+		} else if (typeChar == '~') {
+			tag.escapeMode = Tag::SqlUnescape;
+			++pos;
+		} else if (typeChar == '%') {
+			tag.escapeMode = Tag::SqlEscape;
 			++pos;
 		} else if (typeChar == '{') {
 			tag.escapeMode = Tag::Raw;
